@@ -20,6 +20,10 @@ void Control::normalizeAngle(double* yaw) {
   }
 }
 
+void Control::setStartState(const State& start_state) {
+  ego_state_ = start_state;
+}
+
 void Control::updateState(State* state) {
   state->setPos(Postion(state->pos().x + state->vel().vx * dt_,
                         state->pos().y + state->vel().vy * dt_, 0.0));

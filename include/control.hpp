@@ -16,6 +16,8 @@ class Control {
   double dismax() { return dis_max_; }
   void KinematicControl();
   void updateState();
+  void setStartState(const State& start_state);
+  State& egoState() { return ego_state_; }
 
  private:
   double dt_ = 0.2;
