@@ -7,7 +7,8 @@ class Control {
   Control() {}
   ~Control() {}
 
-  double calDistance(const Postion& ego_postion, const Postion& target_postion);
+  double calDistance(const Position& ego_Position,
+                     const Position& target_Position);
   void normalizeAngle(double* yaw);
   void updateState(State* state);
   void setDisMin(double dis_min) { dis_min_ = dis_min; }
@@ -17,10 +18,11 @@ class Control {
   void KinematicControl();
   void updateState();
   void setStartState(const State& start_state);
+  void setTargetState(const State& target_state);
   State& egoState() { return ego_state_; }
 
  private:
-  double dt_ = 0.2;
+  double dt_ = 0.1;
   double dis_min_ = 0.0;
   double dis_max_ = 0.0;
   State ego_state_;

@@ -4,10 +4,10 @@
 // using namespace std;
 
 namespace Planning {
-double Control::calDistance(const Postion& ego_postion,
-                            const Postion& target_postion) {
-  return std::hypot(ego_postion.x - target_postion.x,
-                    ego_postion.y - target_postion.y);
+double Control::calDistance(const Position& ego_Position,
+                            const Position& target_Position) {
+  return std::hypot(ego_Position.x - target_Position.x,
+                    ego_Position.y - target_Position.y);
 }
 
 void Control::normalizeAngle(double* yaw) {
@@ -24,22 +24,33 @@ void Control::setStartState(const State& start_state) {
   ego_state_ = start_state;
 }
 
+void Control::setTargetState(const State& target_state) {
+  target_state_ = target_state;
+  std::cout << "target_state_.pos().x = " << target_state_.pos().x
+            << ", target_state_.pos().y =" << target_state_.pos().y
+            << std::endl;
+}
+
 void Control::updateState(State* state) {
-  state->setPos(Postion(state->pos().x + state->vel().vx * dt_,
-                        state->pos().y + state->vel().vy * dt_, 0.0));
+  state->setPos(Position(state->pos().x + state->vel().vx * dt_,
+                         state->pos().y + state->vel().vy * dt_, 0.0));
   state->setYaw(state->yaw() + state->omega() * dt_);
 }
 
 void Control::updateState() {
-  ego_state_.setPos(Postion(ego_state_.pos().x + ego_state_.vel().vx * dt_,
-                            ego_state_.pos().y + ego_state_.vel().vy * dt_,
-                            0.0));
+  ego_state_.setPos(Position(ego_state_.pos().x + ego_state_.vel().vx * dt_,
+                             ego_state_.pos().y + ego_state_.vel().vy * dt_,
+                             0.0));
+  std::cout << "ego_state_.vel().vx = " << ego_state_.vel().vx
+            << ", ego_state_.vel().vy =" << ego_state_.vel().vy << std::endl;
+  std::cout << "ego_state_.pos().x = " << ego_state_.pos().x
+            << ", ego_state_.pos().y =" << ego_state_.pos().y << std::endl;
   ego_state_.setYaw(ego_state_.yaw() + ego_state_.omega() * dt_);
 }
 
 void Control::KinematicControl() {
   double epsilon_distance = calDistance(ego_state_.pos(), target_state_.pos());
-  std::cout << "epsilon_distance = " << epsilon_distance << std::endl;
+  std::cout << "    = " << epsilon_distance << std::endl;
 
   double epsilon_yaw = std::atan2(-ego_state_.pos().y + target_state_.pos().y,
                                   -ego_state_.pos().x + target_state_.pos().x);
@@ -55,7 +66,8 @@ void Control::KinematicControl() {
   double vy = k1_ * epsilon_distance * std::sin(epsilon_yaw) +
               ego_state_.vel().vy * std::cos(target_yaw - epsilon_yaw);
   std::cout << "vy = " << vy << std::endl;
-
+  Vel vel(vx, vy, 0.0);
+  ego_state_.setVel(vel);
   double omega = k2_ * epsilon_yaw + std::sqrt(vx * vx + vy * vy) /
                                          epsilon_distance *
                                          std::sin(target_yaw - epsilon_yaw);
