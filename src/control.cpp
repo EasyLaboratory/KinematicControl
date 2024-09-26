@@ -50,7 +50,7 @@ void Control::updateState() {
 
 void Control::KinematicControl() {
   double epsilon_distance = calDistance(ego_state_.pos(), target_state_.pos());
-  std::cout << "    = " << epsilon_distance << std::endl;
+  std::cout << "epsilon_distance = " << epsilon_distance << std::endl;
 
   double epsilon_yaw = std::atan2(-ego_state_.pos().y + target_state_.pos().y,
                                   -ego_state_.pos().x + target_state_.pos().x);
