@@ -16,9 +16,11 @@ class Control {
   double dismin() { return dis_min_; }
   double dismax() { return dis_max_; }
   void KinematicControl();
+  bool Kinematic();
   void updateState();
   void setStartState(const State& start_state);
   void setTargetState(const State& target_state);
+  double flyingHeight() { return flying_height_; }
   State& egoState() { return ego_state_; }
 
  private:
@@ -29,5 +31,11 @@ class Control {
   State target_state_;
   double k1_ = 1.0;
   double k2_ = 1.0;
+  double vmax_ = 5.0;
+  double omegamax_ = 1.5;
+  double flying_height_ = 10.0;
+  double theta2_ = 70 * M_PI / 180.0;
+  double theta1_ = 20 * M_PI / 180.0;
+  double Ed_ = 0.0;
 };
 }  // namespace Planning

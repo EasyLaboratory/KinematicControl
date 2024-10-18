@@ -49,6 +49,62 @@ void Control::updateState() {
 }
 
 void Control::KinematicControl() {
+  // 这些是为了让无人机在目标后面的一定范围内，根据高度确定跟踪范围
+  double distance = calDistance(ego_state_.pos(), target_state_.pos());
+  double Ed_max = ego_state_.pos().z * std::tan(theta2_);
+  double Ed_min = ego_state_.pos().z * std::tan(theta1_);
+  if (distance < Ed_min) {
+    Ed_ = Ed_min;
+  } else if (distance > Ed_max) {
+    Ed_ = Ed_max;
+  } else {
+    Ed_ = 0.0;
+  }
+  double epsilon_distance = distance - Ed_;
+  std::cout << "distance = " << distance << std::endl;
+  std::cout << "epsilon_distance = " << epsilon_distance << std::endl;
+  // 当前位置和目标物体连线的角度
+  double tao_d = std::atan2(target_state_.pos().y - ego_state_.pos().y,
+                            target_state_.pos().x - ego_state_.pos().x);
+  // 目标物体的航向角
+  double tao_t = std::atan2(target_state_.vel().vy, target_state_.vel().vx);
+  double vt = std::hypot(target_state_.vel().vx, target_state_.vel().vy);
+  // 和目标位置计算得到的当前角度值
+  double epsilon_tao = tao_d;
+
+  double vx = k1_ * epsilon_distance * std::cos(epsilon_tao) +
+              vt * std::cos(tao_t - tao_d) * std::cos(epsilon_tao);
+  // if (vx > vmax_) {
+  //   vx = vmax_;
+  // }
+  // if (vx < vmax_ * (-1.0)) {
+  //   vx = -1 * vmax_;
+  // }
+  double vy = k1_ * epsilon_distance * std::sin(epsilon_tao) +
+              vt * std::cos(tao_t - tao_d) * std::sin(epsilon_tao);
+  // if (vy > vmax_) {
+  //   vy = vmax_;
+  // }
+  // if (vx < vmax_ * (-1.0)) {
+  //   vy = -1 * vmax_;
+  // }
+
+  Vel vel(vx, vy, 0.0);
+  ego_state_.setVel(vel);
+  // normalizeAngle(&target_yaw);
+  // ego_state_.setYaw(target_yaw);
+  double omega =
+      k2_ * epsilon_tao + vt / epsilon_distance * std::sin(tao_t - tao_d);
+  if (omega > omegamax_) {
+    omega = omegamax_;
+  }
+  if (omega < omegamax_ * (-1.0)) {
+    omega = -1 * omegamax_;
+  }
+  updateState();
+}
+
+bool Control::Kinematic() {
   double epsilon_distance = calDistance(ego_state_.pos(), target_state_.pos());
   std::cout << "epsilon_distance = " << epsilon_distance << std::endl;
 
